@@ -1,7 +1,7 @@
 Catalog Project
 =============
 
-# Getting Started
+## Getting Started
 
 * Download or clone this repository onto your local machine.
 * cd to the root directory, and run "vagrant up" to start your VM.
@@ -10,7 +10,7 @@ Catalog Project
 * Once inside the "Catalog" directory, start the application by running "python application.py" in the command line.
 * navigate to "localhost:5000" on your web browser, and begin exploring the application.
 
-# Built with
+## Built with
 
 * Python
 * Flask
@@ -19,6 +19,6 @@ Catalog Project
 * CSS
 * SQLAlchemy
 
-# Acknowledgements
+## Acknowledgements
 
 Built as part of the Udacity Full Stack Development Nanodegree.
