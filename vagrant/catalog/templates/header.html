@@ -1,0 +1,11 @@
+<nav class="navbar navbar-dark bg-dark">
+  <!-- Navbar content -->
+  <a href="{{url_for('showGames')}}">
+    <span class="glyphicon glyphicon-home" aria-hidden="true"></span>Show All Games
+  </a>
+  <div class="col-md-6 text-right">
+
+    {% include "login.html" %}
+    <a class="btn btn-danger" href="{{url_for('gdisconnect')}}" role="button">Sign Out</a>
+  </div>
+</nav>
