@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, Game, Tournament
+from database_setup import Base, User, Game, Tournament
 from flask import session as login_session
 import random
 import string
@@ -102,6 +102,15 @@ def gconnect():
     data = answer.json()
 
     login_session['username'] = data['name']
+    login_session['email'] = data['email']
+    # see if user exists, if it doesn't make a new one
+    user_id = getUserID(login_session['email'])
+    if not user_id:
+        user_id = createUser(login_session)
+
+    login_session['user_id'] = user_id
+
+    login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
@@ -111,14 +120,37 @@ def gconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
-    flash("you are now logged in as %s" % login_session['username'])
+    output += ''' " style = "width: 300px;
+                height: 300px;
+                border-radius: 150px;
+                -webkit-border-radius: 150px;
+                -moz-border-radius: 150px;"> '''
+    flash("you are now logged in as %s"
+            % login_session['username'])
     print "done!"
     return output
 
-    # DISCONNECT - Revoke a current user's token and reset their login_session
+# user functions
+def createUser(login_session):
+    newUser = User(name=login_session['username'], email=login_session[
+                   'email'])
+    session.add(newUser)
+    session.commit()
+    user = session.query(User).filter_by(email=login_session['email']).one()
+    return user.id
 
+def getUserInfo(user_id):
+    user = session.query(User).filter_by(id=user_id).one()
+    return user
 
+def getUserID(email):
+    try:
+        user = session.query(User).filter_by(email=email).one()
+        return user.id
+    except:
+        return None
+
+# DISCONNECT - Revoke a current user's token and reset their login_session
 @app.route('/gdisconnect')
 def gdisconnect():
     access_token = login_session['access_token']
@@ -126,8 +158,9 @@ def gdisconnect():
     print 'User name is: '
     print login_session['username']
     if access_token is None:
- 	print 'Access Token is None'
-    	response = make_response(json.dumps('Current user not connected.'), 401)
+        print 'Access Token is None'
+        response = make_response(json.dumps('Current user not connected.'),
+                    401)
     	response.headers['Content-Type'] = 'application/json'
     	return response
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
@@ -198,7 +231,8 @@ def newGame():
     if 'username' not in login_session:
         return redirect('/login')
     if request.method == 'POST':
-        newGame = Game(name=request.form['name'])
+        newGame = Game(name=request.form['name'],
+                        user_id=login_session['user_id'])
         session.add(newGame)
         flash('New Game %s Successfully Created' % newGame.name)
         session.commit()
@@ -211,7 +245,16 @@ def newGame():
 def editGame(gameID):
     if 'username' not in login_session:
         return redirect('/login')
+
     editedGame = session.query(Game).filter_by(id=gameID).one()
+    # See if the logged in user is the owner of item
+    creator = getUserInfo(editedGame.user_id)
+    user = getUserInfo(login_session['user_id'])
+    # If logged in user != item owner redirect them
+    if creator.id != login_session['user_id']:
+        flash("Only %s can edit this game." % creator.name)
+        return redirect(url_for('showGames'))
+
     if request.method == 'POST':
         if request.form['name']:
             editedGame.name = request.form['name']
@@ -226,6 +269,13 @@ def deleteGame(gameID):
     if 'username' not in login_session:
         return redirect('/login')
     gameToDelete = session.query(Game).filter_by(id=gameID).one()
+     # See if the logged in user is the owner of item
+    creator = getUserInfo(gameToDelete.user_id)
+    user = getUserInfo(login_session['user_id'])
+    # If logged in user != item owner redirect them
+    if creator.id != login_session['user_id']:
+        flash("Only %s can delete this game." % creator.name)
+        return redirect(url_for('showGames'))
     if request.method == 'POST':
         session.delete(gameToDelete)
         flash('%s Successfully Deleted' % gameToDelete.name)
@@ -243,15 +293,12 @@ def newTourny(gameID):
     game = session.query(Game).filter_by(id=gameID).one()
     if request.method == 'POST':
         newTourny = Tournament(name=request.form['name'],
-                location=request.form['location'],
-                description=request.form['description'],
-                startDate=request.form['startdate'],
-                endDate=request.form['enddate'],
-                gameID=gameID)
+        description=request.form['description'], gameID=gameID,
+        user_id=login_session['user_id'])
         session.add(newTourny)
         session.commit()
         flash('New Tournament %s Successfully Created' % (newTourny.name))
-        return redirect(url_for('showTournys', gameID=gameID))
+        return redirect(url_for('showGames', gameID=gameID))
     else:
         return render_template('newTourny.html', gameID=gameID)
 
@@ -263,31 +310,49 @@ def editTourny(gameID, tourny_id):
         return redirect('/login')
     editedTourny = session.query(Tournament).filter_by(id=tourny_id).one()
     game = session.query(Game).filter_by(id=gameID).one()
+     # See if the logged in user is the owner of item
+    creator = getUserInfo(editedTourny.user_id)
+    user = getUserInfo(login_session['user_id'])
+    # If logged in user != item owner redirect them
+    if creator.id != login_session['user_id']:
+        flash("Only %s can edit this tournament." % creator.name)
+        return redirect(url_for('showGames'))
     if request.method == 'POST':
         if request.form['name']:
             editedTourny.name = request.form['name']
         if request.form['location']:
-            editedTourny.location = request.form['location']
+            editedTourny.description = request.form['description']
         if request.form['description']:
             editedTourny.description = request.form['description']
-        if request.form['startdate']:
-            editedTourny.startDate = request.form['startdate']
-        if request.form['enddate']:
-            editedTourny.endDate = request.form['enddate']
+        if request.form['description']:
+            editedTourny.description = request.form['description']
+        if request.form['description']:
+            editedTourny.description = request.form['description']
         session.add(editedTourny)
         session.commit()
         flash('Tournament Successfully Updated.')
         return redirect(url_for('showTournys', gameID=gameID))
     else:
-        return render_template('editTourny.html', gameID=gameID, tourny_id=tourny_id, item=editedTourny)
+        return render_template('editTourny.html',
+                                gameID=gameID,
+                                tourny_id=tourny_id,
+                                item=editedTourny)
 
 # Delete a tournament
-@app.route('/game/<int:gameID>/tourny/<int:tourny_id>/delete', methods=['GET', 'POST'])
+@app.route('/game/<int:gameID>/tourny/<int:tourny_id>/delete',
+            methods=['GET', 'POST'])
 def deleteTourny(gameID, tourny_id):
     if 'username' not in login_session:
         return redirect('/login')
     game = session.query(Game).filter_by(id=gameID).one()
     itemToDelete = session.query(Tournament).filter_by(id=tourny_id).one()
+     # See if the logged in user is the owner of item
+    creator = getUserInfo(itemToDelete.user_id)
+    user = getUserInfo(login_session['user_id'])
+    # If logged in user != item owner redirect them
+    if creator.id != login_session['user_id']:
+        flash("Only %s can delete this tournament." % creator.name)
+        return redirect(url_for('showGames'))
     if request.method == 'POST':
         session.delete(itemToDelete)
         session.commit()

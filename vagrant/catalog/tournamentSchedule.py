@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from database_setup import Base, Game, Tournament
+from database_setup import Base, User, Game, Tournament
 
 engine = create_engine('sqlite:///upcomingTournaments.db')
 # Bind the engine to the metadata of the Base class so that the
@@ -18,6 +18,12 @@ DBSession = sessionmaker(bind=engine)
 # session.rollback()
 session = DBSession()
 
+# Create fake users
+User1 = User(name="Bat Man",
+              email="batman1@alfred.com")
+session.add(User1)
+session.commit()
+
 #**************Tournaments for League of Legends*****************
 game1 = Game(name="League of Legends")
 session.add(game1)
@@ -28,7 +34,8 @@ tourny1 = Tournament(name='Mid-Season Invitational 2018',
             location="Berlin & Paris",
             startDate="May 3, 2018",
             endDate="May 21, 2018",
-            game=game1)
+            game=game1,
+            user_id=1)
 session.add(tourny1)
 session.commit()
 
@@ -37,7 +44,8 @@ tourny2 = Tournament(name='2018 EU Masters - Main Event',
             location="Online, Europe",
             startDate="April 9, 2018",
             endDate="April 12, 2018",
-            game=game1)
+            game=game1,
+            user_id=1)
 session.add(tourny2)
 session.commit()
 
@@ -46,7 +54,8 @@ tourny3 = Tournament(name='2018 EU Masters - Play-in',
             location="Online, Europe",
             startDate="April 9, 2018",
             endDate="April 12, 2018",
-            game=game1)
+            game=game1,
+            user_id=1)
 session.add(tourny3)
 session.commit()
 
@@ -55,7 +64,8 @@ tourny4 = Tournament(name='2018 NA LCS Spring Split',
             location="Los Angeles",
             startDate="January 20, 2018",
             endDate="March 18, 2018",
-            game=game1)
+            game=game1,
+            user_id=1)
 session.add(tourny4)
 session.commit()
 
@@ -64,12 +74,14 @@ tourny5 = Tournament(name='2018 NA LCS Regional Qualifier',
             location="Los Angeles",
             startDate="September 8, 2017",
             endDate="September 10, 2017 ",
-            game=game1)
+            game=game1,
+            user_id=1)
 session.add(tourny5)
 session.commit()
 
 #*******************Tournament for Overwatch****************
-game2 = Game(name="Overwatch")
+game2 = Game(name="Overwatch",
+user_id=1)
 session.add(game2)
 session.commit()
 
@@ -78,7 +90,8 @@ tourny1 = Tournament(name="Overwatch mini Tournament",
             location="Online, hyderabad",
             startDate="April 24, 2018",
             endDate="April 27, 2018",
-            game=game2)
+            game=game2,
+            user_id=1)
 session.add(tourny1)
 session.commit()
 
@@ -87,7 +100,8 @@ tourny2 = Tournament(name="Overwatch Uprising League",
             location="Online",
             startDate="May 21, 2018",
             endDate="December 21, 2018",
-            game=game2)
+            game=game2,
+            user_id=1)
 session.add(tourny2)
 session.commit()
 
@@ -96,7 +110,8 @@ tourny3 = Tournament(name="League of Ladies Overwatch Tournament",
             location="Online",
             startDate="June 3, 2018",
             endDate="June 3, 2018",
-            game=game2)
+            game=game2,
+            user_id=1)
 session.add(tourny3)
 session.commit()
 
@@ -105,7 +120,8 @@ tourny4 = Tournament(name="Overwatch Tranquility Community",
             location="Online, North America",
             startDate="June 20, 2018",
             endDate="September 29, 2018",
-            game=game2)
+            game=game2,
+            user_id=1)
 session.add(tourny4)
 session.commit()
 
@@ -114,12 +130,14 @@ tourny5 = Tournament(name="Rapture Gaming Festival Tour: Colchester - Overwatch 
             location="Charter Hall, Colchester",
             startDate="July 21, 2018",
             endDate="July 21, 2018",
-            game=game2)
+            game=game2,
+            user_id=1)
 session.add(tourny5)
 session.commit()
 
 #**********************Tournament for Fortnite****************************
-game3 = Game(name="Fortnite")
+game3 = Game(name="Fortnite",
+user_id=1)
 session.add(game3)
 session.commit()
 
@@ -128,7 +146,8 @@ tourny1 = Tournament(name="Friendly Royale",
             location="Los Angeles",
             startDate="May 3, 2018",
             endDate="May 6, 2018",
-            game=game3)
+            game=game3,
+            user_id=1)
 session.add(tourny1)
 session.commit()
 
@@ -137,7 +156,8 @@ tourny2 = Tournament(name="NA Clash",
             location="New York",
             startDate="June 25, 2018",
             endDate="June 30, 2018",
-            game=game3)
+            game=game3,
+            user_id=1)
 session.add(tourny2)
 session.commit()
 
@@ -146,7 +166,8 @@ tourny3 = Tournament(name="Dreamhack",
             location="Los Angeles",
             startDate="September 3, 2018",
             endDate="September 6, 2018",
-            game=game3)
+            game=game3,
+            user_id=1)
 session.add(tourny3)
 session.commit()
 
@@ -155,7 +176,8 @@ tourny4 = Tournament(name="Pre-Worlds Invitational",
             location="Seoul, South Korea",
             startDate="October 16, 2018",
             endDate="October 20, 2018",
-            game=game3)
+            game=game3,
+            user_id=1)
 session.add(tourny4)
 session.commit()
 
@@ -164,12 +186,14 @@ tourny5 = Tournament(name="Worlds",
             location="London, UK",
             startDate="December 3, 2018",
             endDate="December 5, 2018",
-            game=game3)
+            game=game3,
+            user_id=1)
 session.add(tourny5)
 session.commit()
 
 #*******************Tournaments for Melee*******************************
-game4 = Game(name="Super Smash Bros. Melee")
+game4 = Game(name="Super Smash Bros. Melee",
+user_id=1)
 session.add(game4)
 session.commit()
 
@@ -178,7 +202,8 @@ tourny1 = Tournament(name="Let's Smash, Bros",
             location="Dallas, Tx",
             startDate="February 14, 2018",
             endDate="February 14, 2018",
-            game=game4)
+            game=game4,
+            user_id=1)
 session.add(tourny1)
 session.commit()
 
@@ -187,7 +212,8 @@ tourny2 = Tournament(name="GameInformer's skirmish",
             location="Los Angeles",
             startDate="May 6, 2018",
             endDate="May 6, 2018",
-            game=game4)
+            game=game4,
+            user_id=1)
 session.add(tourny2)
 session.commit()
 
@@ -196,7 +222,8 @@ tourny3 = Tournament(name="Global Pre-Qualifier EU",
             location="Edingburg",
             startDate="July 13, 2018",
             endDate="July 16, 2018",
-            game=game4)
+            game=game4,
+            user_id=1)
 session.add(tourny3)
 session.commit()
 
@@ -205,7 +232,8 @@ tourny4 = Tournament(name="Global Pre-Qualifier NA",
             location="New York",
             startDate="August 6, 2018",
             endDate=" August 9, 2018",
-            game=game4)
+            game=game4,
+            user_id=1)
 session.add(tourny4)
 session.commit()
 
@@ -214,7 +242,8 @@ tourny5 = Tournament(name="Global Brawl",
             location="International Space Station",
             startDate="December 25, 2018",
             endDate="December 31, 2018",
-            game=game4)
+            game=game4,
+            user_id=1)
 session.add(tourny5)
 session.commit()
 
