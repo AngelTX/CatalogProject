@@ -54,6 +54,6 @@ class Tournament(Base):
         'endDate': self.endDate
         }
 
-engine = create_engine('sqlite:///upcomingTournaments.db')
+engine = create_engine('postgresql://catalog:udacity@localhost/catalog')
 
 Base.metadata.create_all(engine)
